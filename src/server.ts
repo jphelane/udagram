@@ -51,8 +51,8 @@ const request = require('request');
     });
   });
 
-  function checkImage(url, callback, error) {
-    request(url, { json: true }, (err, response, body) => {
+  function checkImage(url: any, callback: any, error: any) {
+    request(url, { json: true }, (err: any, response: any, body: any) => {
       if (err){
         error();
       }
