@@ -38,17 +38,37 @@ const request = require('request');
     res.send("try GET /filteredimage?image_url={{}}")
   } );
   
-  app.get( "/filteredimage", async ( req, res ) => {
-    let len = req.query.image_url.length;
-    let image_url = req.query.image_url.substring(2, len - 2);
-    console.log('Image URL: ', image_url);
+  app.get( "/filteredimage", async ( req: any, res: any ) => {
+
+    let image_url: string = req.query.image_url;
+
+    //1. validate the image_url query
     checkImage(image_url, () => {
+
+      //2. call filterImageFromURL(image_url) to filter the image
       filterImageFromURL(image_url).then(filteredpath => {
-        res.sendFile(filteredpath);
+
+        //3. send the resulting file in the response
+        const options: object = {};
+        res.status(200).sendFile(filteredpath, options, function (err: any) {
+          if (err){
+            console.log('Unable to send file.\n', err);
+          }
+          else {
+            //4. deletes any files on the server on finish of the response
+            let files_to_delete: Array<string> = [];
+            files_to_delete.push(filteredpath);
+            deleteLocalFiles(files_to_delete);
+          }
+        });
+
+        
       });
+
     }, () => {
-      res.send("<p style='text-align: center'>Error: Please provide an image url that is publicly accessible.</p>")
+      res.status(404).send("<p style='text-align: center'>Error: Please provide an image url that is publicly accessible.</p>")
     });
+
   });
 
   function checkImage(url: any, callback: any, error: any) {
